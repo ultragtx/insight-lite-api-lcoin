@@ -10,6 +10,7 @@ const rpcURL = 'http://localhost:9332'
 const routerConfig = {
     networkType: NETWORK_TYPE,
     rpcURL,
+    cacheEnabled: false,
 };
 
 const app = express()

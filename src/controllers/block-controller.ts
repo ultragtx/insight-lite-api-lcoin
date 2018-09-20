@@ -3,7 +3,10 @@ import { Request, Response, NextFunction } from 'express';
 import { Log, ControllerConfig, RPCResponse } from '../types';
 import { APIError } from '../utils/error';
 import * as _ from 'lodash';
-import { transformClientBlockToBlock } from '../reformers/block';
+import {
+    transformClientBlockToBlock,
+    transformClientBlockHashToResponse,
+} from '../reformers/block';
 import fetch from '../utils/fetch';
 
 export default class BlockController extends BaseController {
@@ -36,10 +39,31 @@ export default class BlockController extends BaseController {
             const details = 0;
             const clientBlock: any = await this.nodeClient.execute('getblock', [blockHash, verbose, details]);
             const coinbaseTxHash: string = clientBlock.tx[0];
-            const clientTx: any = await this.nodeClient.getTX(coinbaseTxHash);
-            const block = transformClientBlockToBlock(this.network, clientBlock, clientTx);
+            const coinbaseTx: any = await this.nodeClient.getTX(coinbaseTxHash);
+            const block = transformClientBlockToBlock(this.network, clientBlock, coinbaseTx);
             res.json(block);
-        } 
+        }
+        catch (error) {
+            this.handleError(error, res);
+        }
+    }
+
+    async getBlocks(req: Request, res: Response, next: NextFunction) {
+        try {
+            const result = await this.nodeClient.execute('getblocks', []);
+            res.json(result);
+        }
+        catch (error) {
+            this.handleError(error, res);
+        }
+    }
+
+    async getBlockHash(req: Request, res: Response, next: NextFunction) {
+        try {
+            const blockHeight: number = Number(req.params.height);
+            const result: any = await this.nodeClient.execute('getblockhash', [blockHeight]);
+            res.json(transformClientBlockHashToResponse(result));
+        }
         catch (error) {
             this.handleError(error, res);
         }

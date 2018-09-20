@@ -6,6 +6,7 @@ export interface RouterConfig {
     networkType: network_type;
     rpcURL: string;
     apiKey?: string;
+    cacheEnabled?: boolean;
 };
 
 export interface Log {

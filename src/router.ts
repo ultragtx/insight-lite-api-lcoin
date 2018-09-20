@@ -7,6 +7,7 @@ import { ControllerConfig } from './types';
 import { networks } from 'lcoin';
 import { NodeClient } from 'lclient';
 import { ClientOptions } from 'bcurl';
+import CacheControl from './middlewares/cache-control';
 
 const router = (config: RouterConfig) => {
     const router = Router();
@@ -25,12 +26,34 @@ const router = (config: RouterConfig) => {
         nodeClient: new NodeClient(clientOptions),
     };
 
+    const cacheControl = new CacheControl({ cacheEnabled: config.cacheEnabled });
+
     const blockController = new BlockController(controllerConfig);
 
     router.get(
+        '/blocks',
+        cacheControl.short(),
+        blockController.getBlocks.bind(blockController),
+    );
+
+    router.get(
         '/block/:blockHash',
+        cacheControl.short(),
         blockController.checkBlockHash.bind(blockController),
         blockController.getBlockByHash.bind(blockController),
+    );
+
+    router.get( // TODO
+        '/rawblock/:blockHash',
+        cacheControl.short(),
+        blockController.checkBlockHash.bind(blockController),
+        blockController.getBlockByHash.bind(blockController),
+    );
+
+    router.get(
+        '/block-index/:height',
+        cacheControl.short(),
+        blockController.getBlockHash.bind(blockController),
     );
 
     return router;
