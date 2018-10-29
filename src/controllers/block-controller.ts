@@ -30,11 +30,10 @@ export default class BlockController extends BaseController {
     }
 
     async getBlockByHash(req: Request, res: Response, next: NextFunction) {
-        const blockHash: string = req.params.blockHash;
-
-        // TOOD: cache, and change confirmation time
-
         try {
+            const blockHash: string = req.params.blockHash;
+            // TOOD: cache, and change confirmation time
+
             const verbose = 1;
             const details = 0;
             const clientBlock: any = await this.nodeClient.execute('getblock', [blockHash, verbose, details]);
